@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Œuvre Ir Josaphat KIRAKU</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#eeeeee;
+padding:10px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+background:white;
+padding:15px;
+border-radius:15px;
+}
+
+h1{
+text-align:center;
+color:#0066cc;
+font-size:22px;
+}
+
+input,select,button{
+width:100%;
+padding:12px;
+margin:5px 0;
+border-radius:8px;
+}
+
+button{
+background:#0066cc;
+color:white;
+border:0;
+font-size:16px;
+}
+
+.fin{
+background:green;
+}
+
+.pdf{
+background:#800080;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:12px;
+margin-top:15px;
+}
+
+th{
+background:#0066cc;
+color:white;
+}
+
+td,th{
+border:1px solid #999;
+padding:5px;
+text-align:center;
+}
+
+.total{
+background:#eeeeee;
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+}
+
+.delete{
+background:red;
+}
+
+@media print{
+
+button,input,select{
+display:none;
+}
+
+body{
+background:white;
+}
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>Œuvre Ir Josaphat KIRAKU</h1>
+
+
+<input id="description" placeholder="Description activité">
+
+<input id="nom" placeholder="Nom">
+
+<input id="montant" type="number" placeholder="Montant">
+
+
+<select id="devise">
+<option>FC</option>
+<option>$</option>
+</select>
+
+
+<button onclick="ajouter()">➕ Ajouter</button>
+
+<button onclick="nouvelle()">📄 Nouvelle activité</button>
+
+<button class="fin" onclick="finActivite()">✅ FIN</button>
+
+<button class="pdf" onclick="pdf()">📑 PDF</button>
+
+
+<input id="recherche" placeholder="🔎 Recherche" onkeyup="rechercher()">
+
+
+
+<table>
+
+<thead>
+
+<tr>
+<th>N°</th>
+<th>Date</th>
+<th>Description</th>
+<th>Nom</th>
+<th>Montant</th>
+<th>Devise</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="tableau"></tbody>
+
+</table>
+
+
+
+<div class="total">
+
+<p>Total FC : <b id="totalFC">0</b> FC</p>
+
+<p>Total $ : <b id="totalUSD">0</b> $</p>
+
+<p>Total général : <b id="general">0 FC / 0 $</b></p>
+
+</div>
+
+
+<p style="text-align:center">
+Œuvre Ir Josaphat KIRAKU © 2026
+</p>
+
+
+</div>
+
+
+
+<script>
+
+
+let activites=[];
+
+let numero=1;
+
+let bloque=false;
+
+
+let totalFC=0;
+
+let totalUSD=0;
+
+
+
+// Chargement automatique
+
+let sauvegarde=localStorage.getItem("activitesJosaphat");
+
+
+if(sauvegarde){
+
+activites=JSON.parse(sauvegarde);
+
+numero=activites.length+1;
+
+afficher(activites);
+
+}
+
+
+
+
+
+function ajouter(){
+
+
+if(bloque){
+
+alert("Activité terminée");
+
+return;
+
+}
+
+
+let d=description.value;
+
+let n=nom.value;
+
+let m=montant.value;
+
+let dev=devise.value;
+
+
+
+if(n=="" || m==""){
+
+alert("Remplir les champs");
+
+return;
+
+}
+
+
+activites.push({
+
+numero:numero,
+
+date:new Date().toLocaleDateString(),
+
+description:d,
+
+nom:n,
+
+montant:Number(m),
+
+devise:dev
+
+});
+
+
+numero++;
+
+
+sauvegarder();
+
+afficher(activites);
+
+
+nom.value="";
+
+montant.value="";
+
+
+}
+
+
+
+
+
+function afficher(liste){
+
+
+tableau.innerHTML="";
+
+
+totalFC=0;
+
+totalUSD=0;
+
+
+
+liste.forEach((a,i)=>{
+
+
+tableau.innerHTML+=`
+
+<tr>
+
+<td>${a.numero}</td>
+
+<td>${a.date}</td>
+
+<td>${a.description}</td>
+
+<td>${a.nom}</td>
+
+<td>${a.montant}</td>
+
+<td>${a.devise}</td>
+
+<td>
+<button class="delete" onclick="supprimer(${i})">X</button>
+</td>
+
+</tr>
+
+`;
+
+
+
+if(a.devise=="FC") totalFC+=a.montant;
+
+if(a.devise=="$") totalUSD+=a.montant;
+
+
+});
+
+
+
+totalFC.innerHTML=totalFC;
+
+totalUSD.innerHTML=totalUSD;
+
+general.innerHTML=
+totalFC+" FC / "+totalUSD+" $";
+
+
+}
+
+
+
+
+function sauvegarder(){
+
+localStorage.setItem(
+"activitesJosaphat",
+JSON.stringify(activites)
+);
+
+}
+
+
+
+
+function supprimer(i){
+
+activites.splice(i,1);
+
+sauvegarder();
+
+afficher(activites);
+
+}
+
+
+
+
+
+function nouvelle(){
+
+
+if(confirm("Créer une nouvelle activité ?")){
+
+
+activites=[];
+
+numero=1;
+
+bloque=false;
+
+
+localStorage.removeItem("activitesJosaphat");
+
+
+afficher(activites);
+
+
+}
+
+}
+
+
+
+
+
+function finActivite(){
+
+bloque=true;
+
+
+alert(
+"Activité terminée\n\n"+
+"Total FC : "+totalFC+" FC\n"+
+"Total $ : "+totalUSD+" $"
+);
+
+}
+
+
+
+
+
+function rechercher(){
+
+
+let mot=recherche.value.toLowerCase();
+
+
+let resultat=activites.filter(a=>
+
+a.nom.toLowerCase().includes(mot)
+
+||
+
+a.description.toLowerCase().includes(mot)
+
+);
+
+
+
+afficher(resultat);
+
+
+}
+
+
+
+
+
+function pdf(){
+
+window.print();
+
+}
+
+
+</script>
+
+
+</body>
+</html>
